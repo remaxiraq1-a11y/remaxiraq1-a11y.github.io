@@ -1,0 +1,69 @@
+media:
+  input: images
+  output: /images
+
+content:
+  - name: products
+    label: المنتجات
+    type: file
+    path: products.json
+    format: json
+    list: true
+    fields:
+      - name: id
+        label: "المعرّف (أحرف إنكليزية صغيرة وأرقام وشرطة فقط، مثل fp-65)"
+        type: string
+        required: true
+      - name: model
+        label: "الموديل (مثل FP-65)"
+        type: string
+        required: true
+      - name: name
+        label: اسم المنتج بالعربي
+        type: string
+        required: true
+      - name: cat
+        label: القسم
+        type: select
+        required: true
+        options:
+          values:
+            - { value: bt, label: سماعات بلوتوث }
+            - { value: wired, label: سماعات سلكية }
+            - { value: cables, label: كيبلات شحن }
+            - { value: home, label: شواحن منزلية }
+            - { value: car, label: شواحن سيارة }
+            - { value: powerbank, label: باور بانك }
+            - { value: bags, label: حقائب }
+            - { value: fans, label: مراوح }
+            - { value: memory, label: رامات وذواكر }
+            - { value: misc, label: متنوعة }
+      - name: price
+        label: السعر (دينار)
+        type: number
+        required: true
+      - name: old
+        label: السعر قبل الخصم (اتركه فارغ إذا ماكو خصم)
+        type: number
+      - name: qty
+        label: الكمية المتوفرة (0 = نفذت)
+        type: number
+        required: true
+      - name: new
+        label: يظهر بقسم "وصل حديثاً"
+        type: boolean
+      - name: desc
+        label: الوصف
+        type: text
+      - name: specs
+        label: المواصفات (كل سطر مواصفة)
+        type: string
+        list: true
+      - name: images
+        label: الصور (حد أقصى 3)
+        type: image
+        list:
+          max: 3
+      - name: video
+        label: فيديو (اختياري)
+        type: file
