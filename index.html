@@ -291,6 +291,7 @@ footer ul a:hover{color:var(--acc)}
 const CONFIG = {
  whatsapp: "9647836644721",
  whatsappShow: "0783 664 4721",
+ ordersUrl: "",   // رابط Google Apps Script لحفظ الطلبات بجدول Google Sheets
  delivery: 5000,
  lowStock: 5,
  social: {
@@ -409,7 +410,7 @@ function renderProd(id){
    <p>${esc(p.desc)}</p>
    ${(p.specs||[]).length?`<ul class="specs">${p.specs.map(s=>`<li>${esc(s)}</li>`).join("")}</ul>`:""}
    ${avail(p)&&!hasP(p)?`<a class="btn w" style="width:100%" target="_blank" rel="noopener" href="${wa('مرحبا ريماكس العراق، أريد أعرف سعر: REMAX '+p.model+' - '+p.name)}">اسأل عن السعر على واتساب</a>`:avail(p)?`<div class="buy"><div class="qsel"><button data-pq="1">+</button><span id="pqv">1</span><button data-pq="-1">−</button></div><button class="btn k" data-addn="${p.id}">أضف إلى السلة</button></div>
-    <a class="btn w" style="width:100%;margin-top:10px" target="_blank" rel="noopener" href="${wa('مرحبا ريماكس العراق، أريد أطلب: REMAX '+p.model+' - '+p.name)}">اطلب مباشرة على واتساب</a>`
+    <button class="btn" style="width:100%;margin-top:10px;background:var(--acc);color:#fff" data-buy="${p.id}">اطلب الآن</button>`
    :`<a class="btn w" style="width:100%" target="_blank" rel="noopener" href="${wa('مرحبا، بلغوني من يتوفر: REMAX '+p.model+' - '+p.name)}">بلّغني عند التوفر</a>`}
    <div class="wbox"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.6" style="flex-shrink:0"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
     <div><b>ضمان 12 شهر من شركة وميض الذهب</b><small>الوكيل الحصري لـ REMAX في العراق. أي خلل مصنعي يُستبدل فوراً. لا يشمل الكسر وسوء الاستخدام.</small><a href="#warranty">تفاصيل الضمان ←</a></div></div>
@@ -437,7 +438,9 @@ function totals(){ let s=0,n=0; for(const id in cart){const p=find(id); if(p){s+
 function renderCart(){
  for(const id in cart){ const p=find(id); if(!p||!avail(p)||!hasP(p)) delete cart[id]; }
  const {s,n}=totals(); $("count").textContent=n; $("count").style.display=n?"grid":"none";
- if(done){ $("items").innerHTML=""; $("df").innerHTML=`<div class="okbox"><b>✅ طلبك جاهز!</b><br>اضغط الزر حتى ينرسل لنا على الواتساب، ونتواصل وياك لتأكيد التوصيل.<a class="btn w" href="${done}" target="_blank" rel="noopener">إرسال الطلب على واتساب</a></div><button class="btn k" id="newOrder" style="flex:none">متابعة التسوق</button>`; return; }
+ if(done){ $("items").innerHTML=""; $("df").innerHTML = done.saved
+   ? `<div class="okbox"><b style="font-size:1.1rem">✅ تم استلام طلبك</b><br>رقم الطلب: <b class="en">${done.id}</b><br>راح نتصل بيك على رقمك خلال وقت قصير لتأكيد الطلب والتوصيل. شكراً لاختيارك ريماكس العراق.</div><button class="btn k" id="newOrder" style="flex:none">متابعة التسوق</button>`
+   : `<div class="okbox"><b>✅ طلبك جاهز!</b><br>اضغط الزر حتى ينرسل لنا على الواتساب، ونتواصل وياك لتأكيد التوصيل.<a class="btn w" href="${done.wa}" target="_blank" rel="noopener">إرسال الطلب على واتساب</a></div><button class="btn k" id="newOrder" style="flex:none">متابعة التسوق</button>`; return; }
  const ids=Object.keys(cart);
  $("items").innerHTML=ids.length?ids.map(id=>{const p=find(id);return `<div class="it">${media(p,false)}<div class="t"><span class="en">${esc(p.model)}</span>${esc(p.name)}<b>${fmt(p.price*cart[id])}</b></div><div class="qsel"><button data-cq="${id}" data-d="1">+</button><span>${cart[id]}</span><button data-cq="${id}" data-d="-1">−</button></div></div>`}).join(""):`<div class="empty">السلة فارغة</div>`;
  if(!ids.length){ $("df").innerHTML=""; return; }
@@ -451,17 +454,19 @@ function renderCart(){
   <div class="row"><span>التوصيل</span><span>${fmt(CONFIG.delivery)}</span></div>
   <div class="row t"><span>الإجمالي</span><span>${fmt(s+CONFIG.delivery)}</span></div>
   <div class="err" id="err"></div>
-  <button class="btn w" id="order">إتمام الطلب عبر واتساب</button>`;
+  <button class="btn k" id="order" style="flex:none">تأكيد الطلب</button>
+  <small style="color:var(--muted);text-align:center">الدفع نقداً عند الاستلام · نتصل بيك لتأكيد التوصيل</small>`;
 }
 function add(id,n){ const p=find(id); if(!p||!avail(p)||!hasP(p)) return; cart[id]=Math.min((cart[id]||0)+n,maxQ(p)); save(); renderCart(); }
 const drawer=o=>{ $("drawer").classList.toggle("on",o); $("ov").classList.toggle("on",o); };
 
 document.addEventListener("click",e=>{
- const t=e.target.closest("[data-open],[data-cat],[data-addn],[data-cq],[data-pq],[data-g],button");
+ const t=e.target.closest("[data-open],[data-cat],[data-addn],[data-buy],[data-cq],[data-pq],[data-g],button");
  if(!t) return;
  if(t.dataset.open){ location.hash="p-"+t.dataset.open; return; }
  if(t.dataset.cat){ location.hash = t.dataset.cat==="all"?"all":"c-"+t.dataset.cat; return; }
  if(t.dataset.addn){ add(t.dataset.addn,pq); drawer(true); return; }
+ if(t.dataset.buy){ add(t.dataset.buy,pq); drawer(true); setTimeout(()=>{ const n=$("cname"); if(n){ n.scrollIntoView({block:"center"}); n.focus(); } },320); return; }
  if(t.dataset.g){ showMain(find(location.hash.slice(3)),+t.dataset.g); return; }
  if(t.dataset.pq){ const p=find(location.hash.slice(3)); pq=Math.max(1,Math.min(maxQ(p),pq+ +t.dataset.pq)); $("pqv").textContent=pq; return; }
  if(t.dataset.cq){ const id=t.dataset.cq,p=find(id); cart[id]=Math.min(cart[id]+ +t.dataset.d,maxQ(p)); if(cart[id]<=0) delete cart[id]; save(); renderCart(); return; }
@@ -476,7 +481,13 @@ document.addEventListener("click",e=>{
   let m=`🛒 طلب جديد - ريماكس العراق\n\nالاسم: ${name}\nالموبايل: ${phone}\nالمحافظة: ${gov}\nالعنوان: ${addr}\n\nالمنتجات:\n`;
   for(const id in cart){const p=find(id); m+=`• REMAX ${p.model} - ${p.name} × ${cart[id]} = ${fmt(p.price*cart[id])}\n`}
   m+=`\nالمجموع: ${fmt(s)}\nالتوصيل: ${fmt(CONFIG.delivery)}\nالإجمالي: ${fmt(s+CONFIG.delivery)}`;
-  done=wa(m); cart={}; save(); renderCart();
+  const id="R"+Date.now().toString().slice(-7);
+  const items=Object.keys(cart).map(k=>{const p=find(k);return `${p.model} - ${p.name} × ${cart[k]}`}).join(" | ");
+  const finish=saved=>{ done={id,saved,wa:wa(m)}; cart={}; save(); renderCart(); };
+  if(!CONFIG.ordersUrl){ finish(false); return; }
+  t.disabled=true; t.textContent="جاري إرسال الطلب...";
+  const body=new URLSearchParams({id,name,phone,gov,addr,items,subtotal:s,delivery:CONFIG.delivery,total:s+CONFIG.delivery});
+  fetch(CONFIG.ordersUrl,{method:"POST",mode:"no-cors",body}).then(()=>finish(true)).catch(()=>finish(false));
  }
 });
 $("ov").onclick=()=>drawer(false);
