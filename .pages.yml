@@ -34,6 +34,7 @@ content:
             - { value: home, label: شواحن منزلية }
             - { value: car, label: شواحن سيارة }
             - { value: powerbank, label: باور بانك }
+            - { value: watches, label: ساعات ذكية }
             - { value: bags, label: حقائب }
             - { value: fans, label: مراوح }
             - { value: memory, label: رامات وذواكر }
