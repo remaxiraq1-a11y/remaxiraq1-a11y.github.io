@@ -1,0 +1,17 @@
+{
+  "name": "ريماكس العراق",
+  "short_name": "ريماكس",
+  "description": "منتجات REMAX الأصلية بضمان 12 شهر من شركة وميض الذهب، الوكيل الحصري في العراق",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/?source=app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#111113",
+  "icons": [
+    {"src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
