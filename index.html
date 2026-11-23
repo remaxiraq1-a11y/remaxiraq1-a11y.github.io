@@ -544,7 +544,8 @@ document.addEventListener("click",e=>{
   const finish=saved=>{ done={id,saved,wa:wa(m)}; cart={}; save(); renderCart(); };
   if(!CONFIG.ordersUrl){ finish(false); return; }
   t.disabled=true; t.textContent="جاري إرسال الطلب...";
-  const body=new URLSearchParams({id,name,phone,gov,addr,items,subtotal:s,delivery:CONFIG.delivery,total:s+CONFIG.delivery});
+  const ck=k=>{ const m=document.cookie.match(new RegExp("(?:^|; )"+k+"=([^;]*)")); return m?decodeURIComponent(m[1]):""; };
+  const body=new URLSearchParams({id,name,phone,gov,addr,items,subtotal:s,delivery:CONFIG.delivery,total:s+CONFIG.delivery,ids:Object.keys(cart).join(","),ua:navigator.userAgent,url:location.href,fbp:ck("_fbp"),fbc:ck("_fbc")});
   fetch(CONFIG.ordersUrl,{method:"POST",mode:"no-cors",body}).then(()=>finish(true)).catch(()=>finish(false));
  }
 });
