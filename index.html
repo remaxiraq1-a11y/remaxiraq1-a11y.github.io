@@ -7,6 +7,15 @@
 <meta name="description" content="ريماكس العراق - منتجات REMAX الأصلية بضمان 12 شهر من شركة وميض الذهب، الوكيل الحصري في العراق. توصيل لكل المحافظات بـ 5000 دينار.">
 <meta property="og:title" content="ريماكس العراق | REMAX Iraq">
 <meta property="og:description" content="منتجات REMAX الأصلية بضمان 12 شهر من الوكيل الحصري — توصيل لكل المحافظات والدفع عند الاستلام">
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','2207109820227390');fbq('track','PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2207109820227390&ev=PageView&noscript=1"/></noscript>
+<!-- End Meta Pixel Code -->
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#111113">
 <link rel="icon" type="image/png" href="/icons/favicon-48.png">
@@ -444,6 +453,7 @@ function showMain(p,i){
 }
 function renderProd(id){
  const p=find(id), c=catOf(p.cat), M=gallery(p); pq=1;
+ track("ViewContent",{content_ids:[p.id],content_name:p.model+" - "+p.name,content_type:"product",value:+p.price||0,currency:"IQD"});
  $("pBody").innerHTML=`
  <div class="crumb"><a href="#home">الرئيسية</a>›<a href="#c-${c.id}">${c.name}</a>›<span class="en">${esc(p.model)}</span></div>
  <div class="pd">
@@ -503,7 +513,8 @@ function renderCart(){
   <button class="btn k" id="order" style="flex:none">تأكيد الطلب</button>
   <small style="color:var(--muted);text-align:center">الدفع نقداً عند الاستلام · نتصل بيك لتأكيد التوصيل</small>`;
 }
-function add(id,n){ const p=find(id); if(!p||!avail(p)||!hasP(p)) return; cart[id]=Math.min((cart[id]||0)+n,maxQ(p)); save(); renderCart(); }
+const track=(ev,data,opt)=>{ try{ if(window.fbq) fbq("track",ev,data,opt||{}); }catch(e){} };
+function add(id,n){ const p=find(id); if(!p||!avail(p)||!hasP(p)) return; track("AddToCart",{content_ids:[p.id],content_name:p.model+" - "+p.name,content_type:"product",value:p.price*n,currency:"IQD"}); cart[id]=Math.min((cart[id]||0)+n,maxQ(p)); save(); renderCart(); }
 const drawer=o=>{ $("drawer").classList.toggle("on",o); $("ov").classList.toggle("on",o); };
 
 document.addEventListener("click",e=>{
@@ -512,12 +523,12 @@ document.addEventListener("click",e=>{
  if(t.dataset.open){ location.hash="p-"+t.dataset.open; return; }
  if(t.dataset.cat){ location.hash = t.dataset.cat==="all"?"all":"c-"+t.dataset.cat; return; }
  if(t.dataset.addn){ add(t.dataset.addn,pq); drawer(true); return; }
- if(t.dataset.buy){ add(t.dataset.buy,pq); drawer(true); setTimeout(()=>{ const n=$("cname"); if(n){ n.scrollIntoView({block:"center"}); n.focus(); } },320); return; }
+ if(t.dataset.buy){ add(t.dataset.buy,pq); track("InitiateCheckout",{value:totals().s,currency:"IQD"}); drawer(true); setTimeout(()=>{ const n=$("cname"); if(n){ n.scrollIntoView({block:"center"}); n.focus(); } },320); return; }
  if(t.dataset.g){ showMain(find(location.hash.slice(3)),+t.dataset.g); return; }
  if(t.dataset.pq){ const p=find(location.hash.slice(3)); pq=Math.max(1,Math.min(maxQ(p),pq+ +t.dataset.pq)); $("pqv").textContent=pq; return; }
  if(t.dataset.cq){ const id=t.dataset.cq,p=find(id); cart[id]=Math.min(cart[id]+ +t.dataset.d,maxQ(p)); if(cart[id]<=0) delete cart[id]; save(); renderCart(); return; }
  if(t.id==="sBtn"){ $("sbar").classList.toggle("on"); if($("sbar").classList.contains("on")) $("q").focus(); }
- if(t.id==="cBtn") drawer(true);
+ if(t.id==="cBtn"){ drawer(true); if(totals().n) track("InitiateCheckout",{value:totals().s,currency:"IQD"}); }
  if(t.id==="xBtn") drawer(false);
  if(t.id==="newOrder"){ done=null; renderCart(); drawer(false); }
  if(t.id==="order"){
@@ -529,6 +540,7 @@ document.addEventListener("click",e=>{
   m+=`\nالمجموع: ${fmt(s)}\nالتوصيل: ${fmt(CONFIG.delivery)}\nالإجمالي: ${fmt(s+CONFIG.delivery)}`;
   const id="R"+Date.now().toString().slice(-7);
   const items=Object.keys(cart).map(k=>{const p=find(k);return `${p.model} - ${p.name} × ${cart[k]}`}).join(" | ");
+  track("Purchase",{content_ids:Object.keys(cart),content_type:"product",num_items:Object.values(cart).reduce((a,b)=>a+b,0),value:s,currency:"IQD"},{eventID:id});
   const finish=saved=>{ done={id,saved,wa:wa(m)}; cart={}; save(); renderCart(); };
   if(!CONFIG.ordersUrl){ finish(false); return; }
   t.disabled=true; t.textContent="جاري إرسال الطلب...";
