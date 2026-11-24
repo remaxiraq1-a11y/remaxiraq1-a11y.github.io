@@ -8,6 +8,11 @@
 <meta name="description" content="ريماكس العراق - منتجات REMAX الأصلية بضمان 12 شهر من شركة وميض الذهب، الوكيل الحصري في العراق. توصيل لكل المحافظات بـ 5000 دينار.">
 <meta property="og:title" content="ريماكس العراق | REMAX Iraq">
 <meta property="og:description" content="منتجات REMAX الأصلية بضمان 12 شهر من الوكيل الحصري — توصيل لكل المحافظات والدفع عند الاستلام">
+<!-- TikTok Pixel Code Start -->
+<script>
+!function (w, d, t) { w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for( var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script") ;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)}; ttq.load('DC2N6SBC77U1013HE7TG'); ttq.page(); }(window, document, 'ttq');
+</script>
+<!-- TikTok Pixel Code End -->
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -523,7 +528,11 @@ function renderCart(){
   <button class="btn k" id="order" style="flex:none">تأكيد الطلب</button>
   <small style="color:var(--muted);text-align:center">الدفع نقداً عند الاستلام · نتصل بيك لتأكيد التوصيل</small>`;
 }
-const track=(ev,data,opt)=>{ try{ if(window.fbq) fbq("track",ev,data,opt||{}); }catch(e){} };
+const TT_EV={ViewContent:"ViewContent",AddToCart:"AddToCart",InitiateCheckout:"InitiateCheckout",Purchase:"CompletePayment"};
+const track=(ev,data,opt)=>{
+ try{ if(window.fbq) fbq("track",ev,data,opt||{}); }catch(e){}
+ try{ if(window.ttq&&TT_EV[ev]){ const ids=data.content_ids||[]; ttq.track(TT_EV[ev],{contents:ids.map(id=>({content_id:id,content_type:"product",content_name:(find(id)||{}).name||""})),content_type:"product",value:data.value||0,currency:"IQD"},opt&&opt.eventID?{event_id:opt.eventID}:{}); } }catch(e){}
+};
 function add(id,n){ const p=find(id); if(!p||!avail(p)||!hasP(p)) return; track("AddToCart",{content_ids:[p.id],content_name:p.model+" - "+p.name,content_type:"product",value:p.price*n,currency:"IQD"}); cart[id]=Math.min((cart[id]||0)+n,maxQ(p)); save(); renderCart(); }
 const drawer=o=>{ $("drawer").classList.toggle("on",o); $("ov").classList.toggle("on",o); };
 
