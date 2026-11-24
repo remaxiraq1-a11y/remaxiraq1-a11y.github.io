@@ -531,7 +531,7 @@ function renderCart(){
 const TT_EV={ViewContent:"ViewContent",AddToCart:"AddToCart",InitiateCheckout:"InitiateCheckout",Purchase:"CompletePayment"};
 const track=(ev,data,opt)=>{
  try{ if(window.fbq) fbq("track",ev,data,opt||{}); }catch(e){}
- try{ if(window.ttq&&TT_EV[ev]){ const ids=data.content_ids||[]; ttq.track(TT_EV[ev],{contents:ids.map(id=>({content_id:id,content_type:"product",content_name:(find(id)||{}).name||""})),content_type:"product",value:data.value||0,currency:"IQD"},opt&&opt.eventID?{event_id:opt.eventID}:{}); } }catch(e){}
+ try{ if(window.ttq&&TT_EV[ev]){ let ids=(data.content_ids&&data.content_ids.length)?data.content_ids:Object.keys(cart); ttq.track(TT_EV[ev],{content_id:ids[0]||"",contents:ids.map(id=>({content_id:id,content_type:"product",content_name:(find(id)||{}).name||"",quantity:cart[id]||1,price:+((find(id)||{}).price)||0})),content_type:"product",value:data.value||0,currency:"IQD"},opt&&opt.eventID?{event_id:opt.eventID}:{}); } }catch(e){}
 };
 function add(id,n){ const p=find(id); if(!p||!avail(p)||!hasP(p)) return; track("AddToCart",{content_ids:[p.id],content_name:p.model+" - "+p.name,content_type:"product",value:p.price*n,currency:"IQD"}); cart[id]=Math.min((cart[id]||0)+n,maxQ(p)); save(); renderCart(); }
 const drawer=o=>{ $("drawer").classList.toggle("on",o); $("ov").classList.toggle("on",o); };
@@ -542,12 +542,12 @@ document.addEventListener("click",e=>{
  if(t.dataset.open){ location.hash="p-"+t.dataset.open; return; }
  if(t.dataset.cat){ location.hash = t.dataset.cat==="all"?"all":"c-"+t.dataset.cat; return; }
  if(t.dataset.addn){ add(t.dataset.addn,pq); drawer(true); return; }
- if(t.dataset.buy){ add(t.dataset.buy,pq); track("InitiateCheckout",{value:totals().s,currency:"IQD"}); drawer(true); setTimeout(()=>{ const n=$("cname"); if(n){ n.scrollIntoView({block:"center"}); n.focus(); } },320); return; }
+ if(t.dataset.buy){ add(t.dataset.buy,pq); track("InitiateCheckout",{content_ids:Object.keys(cart),content_type:"product",value:totals().s,currency:"IQD"}); drawer(true); setTimeout(()=>{ const n=$("cname"); if(n){ n.scrollIntoView({block:"center"}); n.focus(); } },320); return; }
  if(t.dataset.g){ showMain(find(location.hash.slice(3)),+t.dataset.g); return; }
  if(t.dataset.pq){ const p=find(location.hash.slice(3)); pq=Math.max(1,Math.min(maxQ(p),pq+ +t.dataset.pq)); $("pqv").textContent=pq; return; }
  if(t.dataset.cq){ const id=t.dataset.cq,p=find(id); cart[id]=Math.min(cart[id]+ +t.dataset.d,maxQ(p)); if(cart[id]<=0) delete cart[id]; save(); renderCart(); return; }
  if(t.id==="sBtn"){ $("sbar").classList.toggle("on"); if($("sbar").classList.contains("on")) $("q").focus(); }
- if(t.id==="cBtn"){ drawer(true); if(totals().n) track("InitiateCheckout",{value:totals().s,currency:"IQD"}); }
+ if(t.id==="cBtn"){ drawer(true); if(totals().n) track("InitiateCheckout",{content_ids:Object.keys(cart),content_type:"product",value:totals().s,currency:"IQD"}); }
  if(t.id==="xBtn") drawer(false);
  if(t.id==="newOrder"){ done=null; renderCart(); drawer(false); }
  if(t.id==="order"){
